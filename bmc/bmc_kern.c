@@ -168,7 +168,12 @@ int bmc_rx_filter_main(struct xdp_md *ctx)
 
 			unsigned int off;
 #pragma clang loop unroll(disable)
-			for (off = 4; off < BMC_MAX_PACKET_LENGTH && payload+off+1 <= data_end && payload[off] == ' '; off++) {} // move offset to the start of the first key
+			// for (off = 4; off < BMC_MAX_PACKET_LENGTH && payload+off+1 <= data_end && payload[off] == ' '; off++) {} // move offset to the start of the first key
+			for (off = 0; off < BMC_MAX_PACKET_LENGTH && payload+off+1 <= data_end; off++) {
+				if ((off > 3) && (payload[off] != ' ')) {
+					break;
+				}
+			} // move offset to the start of the first key
 			if (off < BMC_MAX_PACKET_LENGTH) {
 				pctx->read_pkt_offset = off; // save offset
 				if (bpf_xdp_adjust_head(ctx, (int)(sizeof(*eth) + sizeof(*ip) + sizeof(*udp) + sizeof(struct memcached_udp_header) + off))) { // push headers + 'get ' keyword
@@ -243,7 +248,13 @@ int bmc_hash_keys_main(struct xdp_md *ctx)
 		bpf_spin_unlock(&entry->lock);
 		unsigned int i = 0;
 #pragma clang loop unroll(disable)
-		for (; i < key_len && payload+i+1 <= data_end; i++) { // copy the request key to compare it with the one stored in the cache later
+		// for (; i < key_len && payload+i+1 <= data_end; i++) { // copy the request key to compare it with the one stored in the cache later
+		// 	key->data[i] = payload[i];
+		// }
+		for (; i < key_len; i++) { // copy the request key to compare it with the one stored in the cache later
+			if (!(payload+i+1 <= data_end)){
+				break;
+			}
 			key->data[i] = payload[i];
 		}
 		key->len = key_len;
