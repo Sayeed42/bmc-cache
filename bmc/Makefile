@@ -21,8 +21,8 @@ LIBBPF_PATH = $(LINUX_LIB_PATH)/bpf
 
 TARGETS += bmc
 
-CLANG ?= clang-9
-LLC ?= llc-9
+CLANG ?= clang
+LLC ?= llc
 CC := gcc
 
 KERN_SOURCES = ${TARGETS:=_kern.c}
@@ -35,9 +35,9 @@ LIBBPF = $(LIBBPF_PATH)/libbpf.a
 CFLAGS := -g -O2 -Wall
 CFLAGS += -I.
 CFLAGS += -I$(LINUX_LIB_PATH)
-CFLAGS += -I$(LINUX_TOOLS_PATH)/include/uapi
+CFLAGS += -I$(LINUX_PATH)/include/uapi -I$(LINUX_PATH)/include
 
-LDFLAGS ?= -L$(LIBBPF_PATH) -l:libbpf.a -lelf $(USER_LIBS)
+LDFLAGS ?= -L$(LIBBPF_PATH) -l:libbpf.a -lelf $(USER_LIBS) -lz
 
 NOSTDINC_FLAGS := -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 ARCH=$(shell uname -m | sed 's/x86_64/x86/' | sed 's/i386/x86/')
@@ -52,6 +52,7 @@ LINUXINCLUDE += -I$(LINUX_PATH)/include/generated/uapi
 LINUXINCLUDE += -I$(LINUX_PATH)/tools/testing/selftests/bpf
 LINUXINCLUDE += -include $(LINUX_PATH)/include/linux/kconfig.h
 LINUXINCLUDE += -include $(LINUX_PATH)/samples/bpf/asm_goto_workaround.h
+LINUXINCLUDE += -I$(LIBBPF_PATH)
 
 EXTRA_CFLAGS=-Werror
 

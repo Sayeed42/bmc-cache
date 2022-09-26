@@ -298,11 +298,11 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 retry:
-			if (bpf_program__pin_instance(progs[i].prog, filename, 0)) {
+			if (bpf_program__pin(progs[i].prog, filename)) {
 				fprintf(stderr, "Error: Failed to pin program '%s' to path %s\n", progs[i].name, filename);
 				if (errno == EEXIST) {
 					fprintf(stdout, "BPF program '%s' already pinned, unpinning it to reload it\n", progs[i].name);
-					if (bpf_program__unpin_instance(progs[i].prog, filename, 0)) {
+					if (bpf_program__unpin(progs[i].prog, filename)) {
 						fprintf(stderr, "Error: Fail to unpin program '%s' at %s\n", progs[i].name, filename);
 						return -1;
 					}
